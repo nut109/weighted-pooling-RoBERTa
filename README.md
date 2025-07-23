@@ -68,7 +68,7 @@ pip install -r requirements.txt
      --data-path data.csv \
      --output-dir ./model \
      --epochs 3 \
-     --batch-size 16
+     --batch-size 32
    ```
    The best checkpoint and tokenizer are saved to **`./model`**.
 
