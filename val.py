@@ -7,16 +7,15 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from tqdm import tqdm
 import csv
 
-# ---- 配置 ----
-DATA_DIR = r"D:\ai_detect\data\M4"  # 修改为你的数据目录
-MODEL_PATH = r"D:\ai_detect\code\custom_roberta_text_classification_model\pytorch_model.bin"
+DATA_DIR = r"your_file"  
+MODEL_PATH = r"pytorch_model.bin"
 MODEL_NAME = "roberta-base"
 BATCH_SIZE = 8
 MAX_LEN = 512
 OUTPUT_CSV = "result.csv"
 FAILED_FILE = "failed_files.txt"
 
-# ---- Dataset 类 ----
+
 class WikiDollyDataset(Dataset):
     def __init__(self, data, tokenizer, max_len, mode='prompt_text'):
         self.data = data
@@ -33,7 +32,6 @@ class WikiDollyDataset(Dataset):
         prompt = item['prompt']
         text = item['text']
 
-        # 保险：如果字段是 list，拼成 str
         if isinstance(prompt, list):
             prompt = " ".join(prompt)
         if isinstance(text, list):
@@ -63,7 +61,6 @@ class WikiDollyDataset(Dataset):
             'labels': torch.tensor(item['label'], dtype=torch.long)
         }
 
-# ---- 模型类 ----
 class CustomRobertaModel(torch.nn.Module):
     def __init__(self, model_name):
         super(CustomRobertaModel, self).__init__()
@@ -80,7 +77,6 @@ class CustomRobertaModel(torch.nn.Module):
         logits = self.classifier(pooled_output)
         return logits
 
-# ---- 加载数据 ----
 def load_jsonl(path):
     data = []
     with open(path, 'r', encoding='utf-8') as f:
@@ -98,7 +94,6 @@ def load_jsonl(path):
             })
     return data
 
-# ---- 验证函数 ----
 def evaluate(model, data_loader, device):
     model.eval()
     y_true, y_pred = [], []
@@ -121,7 +116,6 @@ def evaluate(model, data_loader, device):
     pre = precision_score(y_true, y_pred)
     return recall, f1, acc, pre
 
-# ---- 主批处理 ----
 def main():
     tokenizer = RobertaTokenizer.from_pretrained(MODEL_NAME)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -129,7 +123,6 @@ def main():
     model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.to(device)
 
-    # 第一次写结果文件表头
     if not os.path.exists(OUTPUT_CSV):
         with open(OUTPUT_CSV, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
